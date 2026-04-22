@@ -695,13 +695,46 @@ export default class Listings {
                 .toString();
             const amountTrade = amountCanTrade.toString();
 
+            var easyCopyPaste: string;
+			if (entry.id) {
+				if (key === 'buy') {
+					easyCopyPaste = 'sell_' + entry.id;
+				} else if (key === 'sell') {
+					easyCopyPaste = 'buy_' + entry.id;
+				}
+			} else {
+				// 🎨 Eğer item isminde "(Paint:" geçiyorsa özel kural
+				if (entry.name.includes('(Paint:')) {
+					if (key === 'buy') {
+						easyCopyPaste = '!sell ' + entry.name;
+					} else if (key === 'sell') {
+						easyCopyPaste = '!buy ' + entry.name;
+					}
+				} else {
+					// Normal sistem (paint olmayanlar)
+					const prefix = key === 'buy' ? 'sell_' : 'buy_';
+					easyCopyPaste =
+						prefix +
+						entry.name
+							.replace('Specialized Killstreak', 'Spec Ks')
+							.replace('Professional Killstreak', 'Prof Ks')
+							.replace('Festivized ', 'Fest ')
+							.replace('Killstreak ', 'Ks ')
+							.replace(/'/g, '')
+							.replace(/:/g, '')
+							.replace(/[.,\/#!$%\^&\*;{}=\-_`~()]/g, '_')
+							.replace(/ /g, '_');
+				}
+			}
+
             return details
                 .replace(/%price%/g, isShowBoldOnPrice ? boldDetails(price, style) : price)
                 .replace(/%name%/g, entry.id ?? entry.name)
                 .replace(/%max_stock%/g, isShowBoldOnMaxStock ? boldDetails(maxStock, style) : maxStock)
                 .replace(/%current_stock%/g, isShowBoldOnCurrentStock ? boldDetails(currentStock, style) : currentStock)
-                .replace(/%amount_trade%/g, isShowBoldOnAmount ? boldDetails(amountTrade, style) : amountTrade);
-        };
+                .replace(/%amount_trade%/g, isShowBoldOnAmount ? boldDetails(amountTrade, style) : amountTrade)
+				.replace(/%easyCopyPaste%/g, easyCopyPaste);
+				        };
 
         const isCustomBuyNote = entry.note?.buy && intent === 0;
         const isCustomSellNote = entry.note?.sell && intent === 1;
